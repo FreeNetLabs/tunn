@@ -48,8 +48,7 @@ release:
     owner: FreeNetLabs
     name: tunn
   draft: false
-  prerelease_naming:
-    prerelease: 'rc'
+  prerelease: auto
   header: |
     ## Downloads
 
