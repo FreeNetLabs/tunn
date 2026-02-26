@@ -1,0 +1,71 @@
+project_name: tunn
+
+version: 1
+
+builds:
+  - id: tunn
+    main: .
+    binary: tunn
+    ldflags:
+      - -s -w
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - "386"
+      - arm
+    goarm:
+      - "6"
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
+      - goos: freebsd
+        goarch: arm
+      - goos: freebsd
+        goarch: arm64
+
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+release:
+  github:
+    owner: FreeNetLabs
+    name: tunn
+  draft: false
+  prerelease_naming:
+    prerelease: 'rc'
+  header: |
+    ## Downloads
+
+    Choose the appropriate binary for your platform.
+
+    ### Installation Instructions
+
+    1. Download the appropriate binary for your platform
+    2. Extract the archive
+    3. Move the binary to a directory in your PATH
+    4. Make it executable (Linux/macOS): `chmod +x tunn`
+
+    ### Verification
+
+    Verify the integrity of your download using the provided checksums in `checksums.txt`.
+  footer: |
+    ### Support
+
+    For issues and questions, please visit: https://github.com/FreeNetLabs/tunn
