@@ -15,9 +15,7 @@ A cross-platform SSH tunneling tool that creates secure connections through dire
 Download the latest binary from the [releases page](../../releases) or build from source:
 
 ```bash
-git clone https://github.com/ayanrajpoot10/tunn.git
-cd tunn
-go build
+go install github.com/FreeNetLabs/tunn@latest
 ```
 
 ## Quick Start

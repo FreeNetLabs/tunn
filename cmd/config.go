@@ -5,47 +5,37 @@ import (
 	"fmt"
 	"os"
 
-	"tunn/pkg/config"
+	"github.com/FreeNetLabs/tunn/pkg/config"
 
 	"github.com/spf13/cobra"
 )
 
-// configCmd represents the config command and its subcommands.
-// It provides functionality for configuration file management including
-// generation and validation operations.
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Configuration management commands",
 }
 
-// generateCmd represents the config generate command.
-// It creates sample configuration files for different tunnel modes.
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate a sample configuration file",
 	Run:   generateConfig,
 }
 
-// validateCmd represents the config validate command.
-// It validates the syntax and content of configuration files.
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate configuration file",
 	Run:   validateConfig,
 }
 
-// validateFlags holds the command-line flags for the validate subcommand.
 var validateFlags struct {
 	configPath string
 }
 
-// generateFlags holds the command-line flags for the generate subcommand.
 var generateFlags struct {
 	output string
 	mode   string
 }
 
-// init initializes the config command and its subcommands with their respective flags.
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(generateCmd)
@@ -58,9 +48,6 @@ func init() {
 	validateCmd.MarkFlagRequired("config")
 }
 
-// generateConfig generates a sample configuration file based on the specified mode.
-// It creates a configuration template with example values that users can customize
-// for their specific tunneling needs.
 func generateConfig(cmd *cobra.Command, args []string) {
 	var sampleConfig *config.Config
 
@@ -122,9 +109,6 @@ func generateConfig(cmd *cobra.Command, args []string) {
 	fmt.Printf("Success: Sample %s mode configuration generated: %s\n", generateFlags.mode, generateFlags.output)
 }
 
-// validateConfig validates an existing configuration file for syntax and content correctness.
-// It loads the configuration file and performs comprehensive validation checks to ensure
-// all required fields are present and valid for the specified tunnel mode.
 func validateConfig(cmd *cobra.Command, args []string) {
 	configPath := validateFlags.configPath
 	if configPath == "" {
