@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/FreeNetLabs/tunn/pkg/config"
+	"github.com/FreeNetLabs/tunn/internal/config"
 )
 
 type Establisher interface {

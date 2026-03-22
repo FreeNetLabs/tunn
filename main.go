@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/FreeNetLabs/tunn/internal/config"
 	"github.com/FreeNetLabs/tunn/internal/tunnel"
-	"github.com/FreeNetLabs/tunn/pkg/config"
 )
 
 func main() {

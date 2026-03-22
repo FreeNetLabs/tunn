@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FreeNetLabs/tunn/pkg/utils"
+	"github.com/FreeNetLabs/tunn/internal/utils"
 )
 
 type HTTP struct {

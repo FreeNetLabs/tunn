@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/FreeNetLabs/tunn/pkg/config"
-	"github.com/FreeNetLabs/tunn/pkg/connection"
-	"github.com/FreeNetLabs/tunn/pkg/proxy"
-	"github.com/FreeNetLabs/tunn/pkg/ssh"
+	"github.com/FreeNetLabs/tunn/internal/config"
+	"github.com/FreeNetLabs/tunn/internal/connection"
+	"github.com/FreeNetLabs/tunn/internal/proxy"
+	"github.com/FreeNetLabs/tunn/internal/ssh"
 )
 
 type Manager struct {
