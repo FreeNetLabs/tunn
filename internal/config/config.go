@@ -41,7 +41,16 @@ func LoadConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	config := &Config{}
+	config := &Config{
+		SSH: SSHConfig{
+			Port: 22,
+		},
+		Listener: ListenerConfig{
+			Port:      1080,
+			ProxyType: "http",
+		},
+		ConnectionTimeout: 30,
+	}
 	content := os.ExpandEnv(string(data))
 	if err := json.Unmarshal([]byte(content), config); err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
@@ -50,7 +59,6 @@ func LoadConfig(configPath string) (*Config, error) {
 	if err := config.validate(); err != nil {
 		return nil, err
 	}
-	config.setDefaults()
 
 	return config, nil
 }
@@ -78,19 +86,4 @@ func (c *Config) validate() error {
 	}
 
 	return nil
-}
-
-func (c *Config) setDefaults() {
-	if c.SSH.Port == 0 {
-		c.SSH.Port = 22
-	}
-	if c.Listener.Port == 0 {
-		c.Listener.Port = 1080
-	}
-	if c.Listener.ProxyType == "" {
-		c.Listener.ProxyType = "http"
-	}
-	if c.ConnectionTimeout == 0 {
-		c.ConnectionTimeout = 30
-	}
 }
