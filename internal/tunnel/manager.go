@@ -50,7 +50,17 @@ func (m *Manager) Start() error {
 	fmt.Printf("\n✓ Tunnel established and %s proxy running on port %d\n", m.config.Listener.ProxyType, m.config.Listener.Port)
 	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-	m.waitForShutdown()
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sigChan
+	fmt.Println("\n→ Shutdown signal received, closing tunnel...")
+
+	if m.sshClient != nil {
+		m.sshClient.Close()
+	}
+
+	fmt.Println("✓ Tunnel closed.")
 
 	return nil
 }
@@ -68,18 +78,4 @@ func (m *Manager) startProxy() error {
 	default:
 		return fmt.Errorf("unsupported proxy type: %s", m.config.Listener.ProxyType)
 	}
-}
-
-func (m *Manager) waitForShutdown() {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	<-sigChan
-	fmt.Println("\n→ Shutdown signal received, closing tunnel...")
-
-	if m.sshClient != nil {
-		m.sshClient.Close()
-	}
-
-	fmt.Println("✓ Tunnel closed.")
 }
