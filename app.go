@@ -13,9 +13,8 @@ import (
 )
 
 type App struct {
-	config      *config.Config
-	sshClient   *ssh.Client
-	proxyServer any
+	config    *config.Config
+	sshClient *ssh.Client
 }
 
 func Start(cfg *config.Config) error {
@@ -61,13 +60,9 @@ func (app *App) run() error {
 func (app *App) startProxy() error {
 	switch app.config.LocalType {
 	case "socks5", "socks":
-		socksProxy := proxy.NewSOCKS5(app.sshClient)
-		app.proxyServer = socksProxy
-		return socksProxy.Start(app.config.LocalPort)
+		return proxy.StartSOCKS5(app.sshClient, app.config.LocalPort)
 	case "http":
-		httpProxy := proxy.NewHTTP(app.sshClient)
-		app.proxyServer = httpProxy
-		return httpProxy.Start(app.config.LocalPort)
+		return proxy.StartHTTP(app.sshClient, app.config.LocalPort)
 	default:
 		return fmt.Errorf("unsupported proxy type: %s", app.config.LocalType)
 	}

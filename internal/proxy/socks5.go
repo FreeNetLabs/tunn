@@ -9,20 +9,10 @@ import (
 	"github.com/armon/go-socks5"
 )
 
-type SOCKS5 struct {
-	sshClient *ssh.Client
-}
-
-func NewSOCKS5(sshClient *ssh.Client) *SOCKS5 {
-	return &SOCKS5{
-		sshClient: sshClient,
-	}
-}
-
-func (s *SOCKS5) Start(localPort int) error {
+func StartSOCKS5(sshClient *ssh.Client, localPort int) error {
 	conf := &socks5.Config{
 		Dial: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return s.sshClient.Dial(network, addr)
+			return sshClient.Dial(network, addr)
 		},
 	}
 

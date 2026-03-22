@@ -10,24 +10,14 @@ import (
 	"github.com/elazarl/goproxy"
 )
 
-type HTTP struct {
-	sshClient *ssh.Client
-}
-
-func NewHTTP(sshClient *ssh.Client) *HTTP {
-	return &HTTP{
-		sshClient: sshClient,
-	}
-}
-
-func (h *HTTP) Start(localPort int) error {
+func StartHTTP(sshClient *ssh.Client, localPort int) error {
 	proxy := goproxy.NewProxyHttpServer()
 
 	proxy.Tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-		return h.sshClient.Dial(network, addr)
+		return sshClient.Dial(network, addr)
 	}
 	proxy.ConnectDial = func(network string, addr string) (net.Conn, error) {
-		return h.sshClient.Dial(network, addr)
+		return sshClient.Dial(network, addr)
 	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", localPort))
