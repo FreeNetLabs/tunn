@@ -4,71 +4,31 @@ import (
 	"bytes"
 	"fmt"
 	"net"
-	"strings"
 )
 
-func ReplacePlaceholders(payload, targetHost, targetPort, hostHeader string) []byte {
-	hostValue := hostHeader
-	if hostValue == "" {
-		hostValue = net.JoinHostPort(targetHost, targetPort)
+func injectPayload(conn net.Conn, payload string) error {
+	if _, err := conn.Write([]byte(payload)); err != nil {
+		conn.Close()
+		return err
 	}
 
-	payload = strings.ReplaceAll(payload, "[host]", hostValue)
-	payload = strings.ReplaceAll(payload, "[crlf]", "\r\n")
-	return []byte(payload)
-}
-
-func ReadHeaders(conn net.Conn) ([]byte, error) {
 	var data []byte
-	buffer := make([]byte, 1)
-
+	buf := make([]byte, 1)
 	for {
-		n, err := conn.Read(buffer)
-		if err != nil {
-			return nil, err
+		if _, err := conn.Read(buf); err != nil {
+			conn.Close()
+			return err
 		}
-		if n > 0 {
-			data = append(data, buffer[0])
-			if len(data) >= 4 && bytes.HasSuffix(data, []byte("\r\n\r\n")) {
-				break
-			}
+		data = append(data, buf[0])
+		if bytes.HasSuffix(data, []byte("\r\n\r\n")) {
+			break
 		}
 	}
-	return data, nil
-}
 
-func EstablishWSTunnel(conn net.Conn, payload, targetHost, targetPort, hostHeader string) (net.Conn, error) {
-	if conn == nil {
-		return nil, fmt.Errorf("connection must be established before WebSocket upgrade")
+	if !bytes.Contains(data, []byte("101")) {
+		conn.Close()
+		return fmt.Errorf("websocket upgrade failed")
 	}
 
-	if payload != "" {
-		wsPayload := ReplacePlaceholders(payload, targetHost, targetPort, hostHeader)
-		fmt.Printf("→ Sending WebSocket upgrade request\n")
-
-		if _, err := conn.Write(wsPayload); err != nil {
-			conn.Close()
-			return nil, fmt.Errorf("failed to send WebSocket upgrade: %w", err)
-		}
-
-		headers, err := ReadHeaders(conn)
-		if err != nil {
-			conn.Close()
-			return nil, fmt.Errorf("failed to read WebSocket response: %w", err)
-		}
-
-		fmt.Printf("← WebSocket response received:\n")
-		fmt.Printf("  %s\n", strings.SplitN(strings.TrimSpace(string(headers)), "\n", 2)[0])
-
-		headerStr := string(headers)
-		if !strings.Contains(headerStr, "HTTP/1.1 101") &&
-			!strings.Contains(headerStr, "HTTP/1.0 101") {
-			conn.Close()
-			return nil, fmt.Errorf("WebSocket upgrade failed: %s", headerStr)
-		}
-
-		fmt.Printf("✓ WebSocket tunnel established\n")
-	}
-
-	return conn, nil
+	return nil
 }

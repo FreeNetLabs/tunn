@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreeNetLabs/tunn/internal/ssh"
 	"github.com/FreeNetLabs/tunn/internal/utils"
 )
 
@@ -18,9 +19,9 @@ type HTTP struct {
 	server *Server
 }
 
-func NewHTTP(ssh SSHClient) *HTTP {
+func NewHTTP(sshClient *ssh.Client) *HTTP {
 	return &HTTP{
-		server: NewServer(ssh),
+		server: NewServer(sshClient),
 	}
 }
 
@@ -29,11 +30,10 @@ func (h *HTTP) Start(localPort int) error {
 }
 
 func (h *HTTP) handleClient(clientConn net.Conn) {
-	h.server.HandleClientWithTimeout(clientConn, "HTTP", 30*time.Second, func() {
+	h.server.HandleClientWithTimeout(clientConn, 30*time.Second, func() {
 		reader := bufio.NewReader(clientConn)
 		req, err := http.ReadRequest(reader)
 		if err != nil {
-			fmt.Printf("✗ Error reading HTTP request: %v\n", err)
 			h.sendError(clientConn, 400, "Bad Request")
 			return
 		}
@@ -49,49 +49,39 @@ func (h *HTTP) handleClient(clientConn net.Conn) {
 func (h *HTTP) handleConnect(clientConn net.Conn, req *http.Request) {
 	host, portInt, err := utils.ParseHostPort(req.Host, 443)
 	if err != nil {
-		fmt.Printf("✗ Invalid host in CONNECT request: %v\n", err)
 		h.sendError(clientConn, 400, "Bad Request")
 		return
 	}
 
-	fmt.Printf("→ HTTP CONNECT request to %s:%d\n", host, portInt)
-
 	response := "HTTP/1.1 200 Connection established\r\n\r\n"
 	if _, err := clientConn.Write([]byte(response)); err != nil {
-		fmt.Printf("✗ Error sending CONNECT response: %v\n", err)
 		return
 	}
 
-	fmt.Printf("✓ HTTP CONNECT tunnel established to %s:%d\n", host, portInt)
 	h.server.OpenSSHChannel(clientConn, host, portInt)
 }
 
 func (h *HTTP) handleRequest(clientConn net.Conn, req *http.Request) {
 	targetHost, targetPort, targetPath, err := h.parseTarget(req)
 	if err != nil {
-		fmt.Printf("✗ Error parsing HTTP target: %v\n", err)
 		h.sendError(clientConn, 400, "Bad Request")
 		return
 	}
 
-	fmt.Printf("→ HTTP %s request to %s:%d%s\n", req.Method, targetHost, targetPort, targetPath)
-
 	address := net.JoinHostPort(targetHost, strconv.Itoa(targetPort))
 	sshConn, err := h.server.ssh.Dial("tcp", address)
 	if err != nil {
-		fmt.Printf("✗ Failed to open SSH channel for HTTP request: %v\n", err)
 		h.sendError(clientConn, 502, "Bad Gateway")
 		return
 	}
 	defer sshConn.Close()
 
 	if err := h.forwardRequest(sshConn, req, targetPath); err != nil {
-		fmt.Printf("✗ Error forwarding HTTP request: %v\n", err)
 		h.sendError(clientConn, 502, "Bad Gateway")
 		return
 	}
 
-	h.forwardResponse(clientConn, sshConn)
+	io.Copy(clientConn, sshConn)
 }
 
 func (h *HTTP) parseTarget(req *http.Request) (host string, port int, path string, err error) {
@@ -105,7 +95,7 @@ func (h *HTTP) parseTarget(req *http.Request) (host string, port int, path strin
 		if parsedURL.Port() != "" {
 			port, err = strconv.Atoi(parsedURL.Port())
 			if err != nil {
-				return "", 0, "", fmt.Errorf("invalid port in URL: %s", parsedURL.Port())
+				return "", 0, "", err
 			}
 		} else {
 			port = 80
@@ -116,12 +106,12 @@ func (h *HTTP) parseTarget(req *http.Request) (host string, port int, path strin
 		path = parsedURL.RequestURI()
 	} else {
 		if req.Host == "" {
-			return "", 0, "", fmt.Errorf("no Host header in HTTP request")
+			return "", 0, "", fmt.Errorf("no Host header")
 		}
 
 		host, port, err = utils.ParseHostPort(req.Host, 80)
 		if err != nil {
-			return "", 0, "", fmt.Errorf("invalid Host header: %v", err)
+			return "", 0, "", err
 		}
 		path = req.URL.RequestURI()
 	}
@@ -145,27 +135,16 @@ func (h *HTTP) forwardRequest(sshConn net.Conn, req *http.Request, targetPath st
 
 	requestBuilder.WriteString("\r\n")
 
-	_, err := sshConn.Write([]byte(requestBuilder.String()))
-	if err != nil {
+	if _, err := sshConn.Write([]byte(requestBuilder.String())); err != nil {
 		return err
 	}
 
 	if req.Body != nil {
-		_, err = io.Copy(sshConn, req.Body)
+		io.Copy(sshConn, req.Body)
 		req.Body.Close()
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
-}
-
-func (h *HTTP) forwardResponse(clientConn net.Conn, sshConn net.Conn) {
-	_, err := io.Copy(clientConn, sshConn)
-	if err != nil && err != io.EOF {
-		fmt.Printf("✗ Error forwarding HTTP response: %v\n", err)
-	}
 }
 
 func (h *HTTP) sendError(clientConn net.Conn, statusCode int, statusText string) {
