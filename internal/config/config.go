@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	Mode      string `json:"mode"`
 	ProxyHost string `json:"proxyHost,omitempty"`
 	ProxyPort string `json:"proxyPort,omitempty"`
 
@@ -64,11 +63,6 @@ func LoadConfig(configPath string) (*Config, error) {
 }
 
 func (c *Config) validate() error {
-	validModes := map[string]bool{"direct": true, "proxy": true}
-	if !validModes[c.Mode] {
-		return fmt.Errorf("invalid mode '%s', must be one of: direct, proxy", c.Mode)
-	}
-
 	if c.SSH.Host == "" {
 		return fmt.Errorf("SSH host is required")
 	}
@@ -79,9 +73,9 @@ func (c *Config) validate() error {
 		return fmt.Errorf("SSH password is required")
 	}
 
-	if c.Mode == "proxy" {
+	if c.ProxyHost != "" || c.ProxyPort != "" {
 		if c.ProxyHost == "" || c.ProxyPort == "" {
-			return fmt.Errorf("proxyHost and proxyPort are required for proxy mode")
+			return fmt.Errorf("both proxyHost and proxyPort are required if a proxy is used")
 		}
 	}
 
