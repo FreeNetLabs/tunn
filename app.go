@@ -28,17 +28,17 @@ func Start(cfg *config.Config) error {
 func (app *App) run() error {
 	conn, err := connection.Connect(app.config)
 	if err != nil {
-		return fmt.Errorf("failed to establish connection: %w", err)
+		return err
 	}
 
 	app.sshClient = ssh.NewClient(conn, app.config.Username, app.config.Password)
 
 	if err := app.sshClient.Establish(); err != nil {
-		return fmt.Errorf("failed to start SSH transport: %w", err)
+		return err
 	}
 
 	if err := app.startProxy(); err != nil {
-		return fmt.Errorf("failed to start proxy: %w", err)
+		return err
 	}
 
 	fmt.Printf("Tunnel established and %s proxy running on port %d\n", app.config.LocalType, app.config.LocalPort)
