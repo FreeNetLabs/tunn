@@ -1,4 +1,4 @@
-package connection
+package transport
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"github.com/FreeNetLabs/tunn/internal/config"
 )
 
-func Connect(cfg *config.Config) (net.Conn, error) {
+func Dial(cfg *config.Config) (net.Conn, error) {
 	address := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 
 	conn, err := net.DialTimeout("tcp", address, time.Duration(cfg.Timeout)*time.Second)

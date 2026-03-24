@@ -23,7 +23,7 @@ func NewClient(conn net.Conn, username, password string) *Client {
 	}
 }
 
-func (c *Client) Establish() error {
+func (c *Client) Connect() error {
 	config := &ssh.ClientConfig{
 		User: c.username,
 		Auth: []ssh.AuthMethod{
