@@ -6,7 +6,6 @@ import (
 	"sync"
 )
 
-// Dialer is an interface that allows the proxy to dial out connections.
 type Dialer interface {
 	Dial(network, address string) (net.Conn, error)
 }
