@@ -48,7 +48,7 @@ func injectPayload(conn net.Conn, payload string) error {
 
 	if !bytes.Contains(data, []byte("101")) {
 		conn.Close()
-		return fmt.Errorf("websocket upgrade failed")
+		return fmt.Errorf("ws upgrade failed")
 	}
 
 	return nil

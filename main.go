@@ -15,22 +15,24 @@ import (
 )
 
 func main() {
-	configFile := flag.String("config", "config.json", "config file path")
+	log.SetFlags(log.Ltime)
+
+	configFile := flag.String("config", "config.json", "config file")
 	flag.Parse()
 
 	cfg, err := config.Load(*configFile)
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Fatalf("config err: %v", err)
 	}
 
 	conn, err := transport.Dial(cfg)
 	if err != nil {
-		log.Fatalf("failed to connect: %v", err)
+		log.Fatalf("dial err: %v", err)
 	}
 
 	sshClient := ssh.NewClient(conn, cfg.Username, cfg.Password)
 	if err := sshClient.Connect(); err != nil {
-		log.Fatalf("failed to establish ssh tunnel: %v", err)
+		log.Fatalf("ssh err: %v", err)
 	}
 
 	switch cfg.LocalType {
@@ -39,24 +41,24 @@ func main() {
 	case "http":
 		err = proxy.ListenAndServeHTTP(sshClient, cfg.LocalPort)
 	default:
-		err = fmt.Errorf("unsupported proxy type: %s", cfg.LocalType)
+		err = fmt.Errorf("unsupported proxy: %s", cfg.LocalType)
 	}
 
 	if err != nil {
-		log.Fatalf("failed to start proxy: %v", err)
+		log.Fatalf("proxy err: %v", err)
 	}
 
-	fmt.Printf("Tunnel established and %s proxy running on port %d\n", cfg.LocalType, cfg.LocalPort)
+	log.Printf("%s proxy ready on port %d", cfg.LocalType, cfg.LocalPort)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	<-sigChan
-	fmt.Println("Shutdown signal received, closing tunnel...")
+	log.Println("closing tunnel...")
 
 	if sshClient != nil {
 		sshClient.Close()
 	}
 
-	fmt.Println("Tunnel closed.")
+	log.Println("closed")
 }

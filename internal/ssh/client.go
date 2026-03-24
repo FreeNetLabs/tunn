@@ -39,7 +39,7 @@ func (c *Client) Connect() error {
 
 	sshConn, chans, reqs, err := ssh.NewClientConn(c.conn, "tcp", config)
 	if err != nil {
-		return fmt.Errorf("failed to create SSH connection: %w", err)
+		return fmt.Errorf("ssh conn err: %w", err)
 	}
 
 	c.client = ssh.NewClient(sshConn, chans, reqs)

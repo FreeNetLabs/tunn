@@ -20,7 +20,7 @@ type Config struct {
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		return nil, fmt.Errorf("read config err: %w", err)
 	}
 
 	cfg := &Config{
@@ -30,7 +30,7 @@ func Load(path string) (*Config, error) {
 		Timeout:   30,
 	}
 	if err := json.Unmarshal(data, cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config: %w", err)
+		return nil, err
 	}
 
 	return cfg, nil
