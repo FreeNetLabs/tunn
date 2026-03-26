@@ -32,7 +32,7 @@ func Load(path string) (*Config, error) {
 	}
 
 	cfg := &Config{
-		Port:    22,
+		Port:    80,
 		Timeout: 30,
 		Local: Local{
 			Port: 1080,
