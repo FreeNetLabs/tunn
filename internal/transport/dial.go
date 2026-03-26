@@ -22,7 +22,7 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 	log.Printf("connected to %s", address)
 
 	if cfg.Payload != "" {
-		if err := injectPayload(conn, cfg.Payload); err != nil {
+		if err := sendPayload(conn, cfg.Payload); err != nil {
 			return nil, err
 		}
 	}
@@ -30,8 +30,8 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 	return conn, nil
 }
 
-func injectPayload(conn net.Conn, payload string) error {
-	log.Println("injecting payload...")
+func sendPayload(conn net.Conn, payload string) error {
+	log.Println("sending payload...")
 	if _, err := conn.Write([]byte(payload)); err != nil {
 		conn.Close()
 		return err
