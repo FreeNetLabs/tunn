@@ -49,7 +49,6 @@ func (c *Client) Connect() error {
 	}
 
 	c.client = ssh.NewClient(sshConn, chans, reqs)
-	log.Println("ssh connected")
 	return nil
 }
 
