@@ -14,7 +14,7 @@ import (
 func Dial(cfg *config.Config) (net.Conn, error) {
 	address := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 
-	log.Printf("dialing %s...", address)
+	log.Printf("connecting to %s...", address)
 	conn, err := net.DialTimeout("tcp", address, time.Duration(cfg.Timeout)*time.Second)
 	if err != nil {
 		return nil, err
@@ -55,6 +55,7 @@ func injectPayload(conn net.Conn, payload string) error {
 		return fmt.Errorf("ws upgrade failed: %s", string(data))
 	}
 
-	log.Printf("server responded: %s", bytes.TrimSpace(data))
+	firstLine := string(bytes.SplitN(bytes.TrimSpace(data), []byte("\r\n"), 2)[0])
+	log.Printf("server responded: %s", firstLine)
 	return nil
 }
