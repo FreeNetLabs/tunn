@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"sync"
@@ -8,6 +9,17 @@ import (
 
 type Dialer interface {
 	Dial(network, address string) (net.Conn, error)
+}
+
+func ListenAndServe(dialer Dialer, proxyType string, localPort int) error {
+	switch proxyType {
+	case "socks":
+		return ListenAndServeSOCKS5(dialer, localPort)
+	case "http":
+		return ListenAndServeHTTP(dialer, localPort)
+	default:
+		return fmt.Errorf("unsupported proxy type: %s", proxyType)
+	}
 }
 
 func relay(a, b net.Conn) {
