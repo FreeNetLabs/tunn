@@ -30,25 +30,25 @@ func main() {
 		log.Fatalf("dial err: %v", err)
 	}
 
-	sshClient := ssh.NewClient(conn, cfg.Username, cfg.Password)
+	sshClient := ssh.NewClient(conn, cfg.Auth.Username, cfg.Auth.Password)
 	if err := sshClient.Connect(); err != nil {
 		log.Fatalf("ssh err: %v", err)
 	}
 
-	switch cfg.LocalType {
+	switch cfg.Local.Type {
 	case "socks":
-		err = proxy.ListenAndServeSOCKS5(sshClient, cfg.LocalPort)
+		err = proxy.ListenAndServeSOCKS5(sshClient, cfg.Local.Port)
 	case "http":
-		err = proxy.ListenAndServeHTTP(sshClient, cfg.LocalPort)
+		err = proxy.ListenAndServeHTTP(sshClient, cfg.Local.Port)
 	default:
-		err = fmt.Errorf("unsupported proxy: %s", cfg.LocalType)
+		err = fmt.Errorf("unsupported proxy: %s", cfg.Local.Type)
 	}
 
 	if err != nil {
 		log.Fatalf("proxy err: %v", err)
 	}
 
-	log.Printf("%s proxy ready on port %d", cfg.LocalType, cfg.LocalPort)
+	log.Printf("%s proxy ready on port %d", cfg.Local.Type, cfg.Local.Port)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

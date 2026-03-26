@@ -7,14 +7,22 @@ import (
 )
 
 type Config struct {
-	Host      string `json:"host"`
-	Port      int    `json:"port"`
-	Username  string `json:"user"`
-	Password  string `json:"pass"`
-	LocalPort int    `json:"localPort"`
-	LocalType string `json:"localType"`
-	Payload   string `json:"payload,omitempty"`
-	Timeout   int    `json:"timeout,omitempty"`
+	Host    string `json:"host"`
+	Port    int    `json:"port"`
+	Auth    Auth   `json:"auth"`
+	Local   Local  `json:"local"`
+	Payload string `json:"payload,omitempty"`
+	Timeout int    `json:"timeout,omitempty"`
+}
+
+type Auth struct {
+	Username string `json:"user,omitempty"`
+	Password string `json:"pass,omitempty"`
+}
+
+type Local struct {
+	Port int    `json:"port,omitempty"`
+	Type string `json:"type,omitempty"`
 }
 
 func Load(path string) (*Config, error) {
@@ -24,10 +32,12 @@ func Load(path string) (*Config, error) {
 	}
 
 	cfg := &Config{
-		Port:      22,
-		LocalPort: 1080,
-		LocalType: "http",
-		Timeout:   30,
+		Port:    22,
+		Timeout: 30,
+		Local: Local{
+			Port: 1080,
+			Type: "http",
+		},
 	}
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, err
