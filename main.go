@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -34,7 +35,15 @@ func main() {
 		log.Fatalf("ssh err: %v", err)
 	}
 
-	err = proxy.ListenAndServe(sshClient, cfg.Local.Type, cfg.Local.Port)
+	switch cfg.Local.Type {
+	case "socks":
+		err = proxy.ListenAndServeSOCKS5(sshClient, cfg.Local.Port)
+	case "http":
+		err = proxy.ListenAndServeHTTP(sshClient, cfg.Local.Port)
+	default:
+		err = fmt.Errorf("unsupported proxy: %s", cfg.Local.Type)
+	}
+
 	if err != nil {
 		log.Fatalf("proxy err: %v", err)
 	}
