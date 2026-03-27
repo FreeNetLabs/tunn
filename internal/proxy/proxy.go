@@ -22,18 +22,6 @@ func ListenAndServe(dialer Dialer, proxyType string, localPort int) error {
 	}
 }
 
-func serve(listener net.Listener, handler func(net.Conn)) {
-	go func() {
-		for {
-			conn, err := listener.Accept()
-			if err != nil {
-				continue
-			}
-			handler(conn)
-		}
-	}()
-}
-
 func relay(a, b net.Conn) {
 	var wg sync.WaitGroup
 	wg.Add(2)
