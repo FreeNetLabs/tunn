@@ -14,15 +14,9 @@ func ListenAndServeSOCKS5(dialer Dialer, localPort int) error {
 		return err
 	}
 
-	go func() {
-		for {
-			conn, err := listener.Accept()
-			if err != nil {
-				continue
-			}
-			go handleSOCKS5Connection(conn, dialer)
-		}
-	}()
+	serve(listener, func(conn net.Conn) {
+		handleSOCKS5Connection(conn, dialer)
+	})
 
 	return nil
 }

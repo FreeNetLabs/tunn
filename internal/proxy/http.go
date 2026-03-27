@@ -18,15 +18,9 @@ func ListenAndServeHTTP(dialer Dialer, localPort int) error {
 		return err
 	}
 
-	go func() {
-		for {
-			conn, err := listener.Accept()
-			if err != nil {
-				continue
-			}
-			go handleHTTPConnection(conn, dialer)
-		}
-	}()
+	serve(listener, func(conn net.Conn) {
+		handleHTTPConnection(conn, dialer)
+	})
 
 	return nil
 }
