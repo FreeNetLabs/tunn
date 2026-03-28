@@ -13,6 +13,11 @@ type Config struct {
 	Local   Local  `json:"local"`
 	Payload string `json:"payload,omitempty"`
 	Timeout int    `json:"timeout,omitempty"`
+	TLS     *TLS   `json:"tls,omitempty"`
+}
+
+type TLS struct {
+	SNI string `json:"sni,omitempty"`
 }
 
 type Auth struct {

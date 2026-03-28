@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -20,6 +21,20 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 		return nil, err
 	}
 	log.Printf("connected to %s", address)
+
+	if cfg.TLS != nil {
+		log.Printf("TLS handshaking (SNI: %s)...", cfg.TLS.SNI)
+		cfgTLS := &tls.Config{
+			ServerName: cfg.TLS.SNI,
+		}
+		tlsConn := tls.Client(conn, cfgTLS)
+		if err := tlsConn.Handshake(); err != nil {
+			conn.Close()
+			return nil, err
+		}
+		conn = tlsConn
+		log.Printf("TLS handshaken (SNI: %s)", cfg.TLS.SNI)
+	}
 
 	if cfg.Payload != "" {
 		if err := sendPayload(conn, cfg.Payload); err != nil {
