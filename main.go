@@ -17,10 +17,10 @@ import (
 func main() {
 	log.SetFlags(log.Ltime)
 
-	configFile := flag.String("config", "config.json", "config file")
+	configPath := flag.String("config", "config.json", "config file path")
 	flag.Parse()
 
-	cfg, err := config.Load(*configFile)
+	cfg, err := config.Load(*configPath)
 	if err != nil {
 		log.Fatalf("config err: %v", err)
 	}
@@ -30,8 +30,8 @@ func main() {
 		log.Fatalf("dial err: %v", err)
 	}
 
-	sshClient := ssh.NewClient(conn, cfg.Auth.Username, cfg.Auth.Password)
-	if err := sshClient.Connect(); err != nil {
+	sshClient, err := ssh.NewClient(conn, cfg)
+	if err != nil {
 		log.Fatalf("ssh err: %v", err)
 	}
 
