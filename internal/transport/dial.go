@@ -23,7 +23,7 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 	log.Printf("connected to %s", address)
 
 	if cfg.TLS != nil {
-		log.Printf("TLS handshaking (SNI: %s)...", cfg.TLS.SNI)
+		log.Printf("handshaking using %s...", cfg.TLS.SNI)
 		cfgTLS := &tls.Config{
 			ServerName: cfg.TLS.SNI,
 		}
@@ -33,7 +33,7 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 			return nil, err
 		}
 		conn = tlsConn
-		log.Printf("TLS handshaken (SNI: %s)", cfg.TLS.SNI)
+		log.Printf("handshaked")
 	}
 
 	if cfg.Payload != "" {
