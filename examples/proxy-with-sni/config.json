@@ -1,0 +1,17 @@
+{
+  "host": "bug-host.com",
+  "port": 443,
+  "auth": {
+    "user": "ssh-username",
+    "pass": "ssh-password"
+  },
+  "local": {
+    "type": "http",
+    "port": 8080
+  },
+  "payload": "GET / HTTP/1.1\r\nHost: vps-server.com\r\nUpgrade: websocket\r\n\r\n",
+  "timeout": 30,
+  "tls": {
+    "sni": "vps-server.com"
+  }
+}

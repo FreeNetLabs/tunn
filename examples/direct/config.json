@@ -1,0 +1,14 @@
+{
+  "host": "vps-server.com",
+  "port": 80,
+  "auth": {
+    "user": "ssh-username",
+    "pass": "ssh-passwrod"
+  },
+  "local": {
+    "type": "http",
+    "port": 8080
+  },
+  "payload": "GET / HTTP/1.1\r\nHost: bug-host.com\r\nUpgrade: websocket\r\n\r\n",
+  "timeout": 30
+}
