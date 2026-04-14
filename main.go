@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/pflag"
 
 	"github.com/FreeNetLabs/tunn/internal/config"
 	"github.com/FreeNetLabs/tunn/internal/proxy"
@@ -17,8 +18,9 @@ import (
 func main() {
 	log.SetFlags(log.Ltime)
 
-	configPath := flag.String("config", "config.json", "config file path")
-	flag.Parse()
+	configPath := pflag.StringP("config", "c", "config.json", "Path to config file")
+
+	pflag.Parse()
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
