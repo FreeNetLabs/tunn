@@ -26,6 +26,7 @@ func Dial(cfg *config.Config) (net.Conn, error) {
 		log.Printf("handshaking using %s...", cfg.TLS.SNI)
 		cfgTLS := &tls.Config{
 			ServerName: cfg.TLS.SNI,
+			InsecureSkipVerify: true,
 		}
 		tlsConn := tls.Client(conn, cfgTLS)
 		if err := tlsConn.Handshake(); err != nil {
